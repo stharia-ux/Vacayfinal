@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Doug & Sasha 🌴">
+<title>Doug & Sasha — DR Trip</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --cream: #FDF8F0; --sand: #E8DCC8; --terracotta: #C4612A; --terracotta-light: #F0D4C0;
+    --teal: #2A7B72; --teal-light: #C8E8E4; --gold: #B8860B; --gold-light: #F5EBC0;
+    --dark: #2C2416; --muted: #7A6A54; --white: #FFFDF8;
+  }
+  html, body { height: 100%; overflow-x: hidden; }
+  body { background: var(--cream); font-family: 'DM Sans', sans-serif; color: var(--dark); font-size: 16px; }
+  .app { max-width: 480px; margin: 0 auto; padding-bottom: 90px; }
+  .header { background: var(--terracotta); padding: 28px 20px 22px; text-align: center; position: relative; overflow: hidden; }
+  .header::before { content:''; position:absolute; top:-30px; right:-30px; width:130px; height:130px; border-radius:50%; background:rgba(255,255,255,0.08); }
+  .header::after { content:''; position:absolute; bottom:-40px; left:-20px; width:110px; height:110px; border-radius:50%; background:rgba(255,255,255,0.06); }
+  .header h1 { font-family:'Playfair Display',serif; color:#FFF8F0; font-size:26px; font-weight:700; }
+  .header .subtitle { color:rgba(255,248,240,0.8); font-size:15px; font-weight:300; margin-top:5px; }
+  .header .countdown { background:rgba(255,255,255,0.15); border-radius:20px; padding:7px 18px; display:inline-block; margin-top:14px; color:#FFF8F0; font-size:14px; font-weight:500; }
+  .nav { display:flex; background:var(--white); border-bottom:1px solid var(--sand); position:sticky; top:0; z-index:100; }
+  .nav-btn { flex:1; padding:14px 8px 12px; border:none; background:none; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:400; color:var(--muted); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:5px; }
+  .nav-btn.active { color:var(--terracotta); font-weight:500; }
+  .nav-btn .nav-icon { font-size:22px; }
+  .nav-btn.active::after { content:''; display:block; height:2px; width:28px; background:var(--terracotta); border-radius:2px; margin:3px auto 0; }
+  .section { display:none; padding:20px 16px; }
+  .section.active { display:block; }
+  .section-title { font-family:'Playfair Display',serif; font-size:24px; font-weight:700; color:var(--dark); margin-bottom:5px; }
+  .section-subtitle { font-size:15px; color:var(--muted); margin-bottom:22px; line-height:1.5; }
+  .category-label { font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:1px; color:var(--terracotta); margin:20px 0 10px; }
+  .pack-item { display:flex; align-items:center; gap:14px; padding:14px 16px; background:var(--white); border-radius:12px; margin-bottom:8px; border:1px solid var(--sand); cursor:pointer; min-height:52px; }
+  .pack-item.checked { opacity:0.5; }
+  .pack-item.checked .item-text { text-decoration:line-through; }
+  .checkbox { width:24px; height:24px; border-radius:50%; border:1.5px solid var(--sand); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.15s; }
+  .pack-item.checked .checkbox { background:var(--teal); border-color:var(--teal); }
+  .checkbox-tick { display:none; width:12px; height:12px; }
+  .pack-item.checked .checkbox-tick { display:block; fill:white; }
+  .item-text { font-size:16px; flex:1; line-height:1.4; }
+  .item-tag { font-size:12px; padding:3px 10px; border-radius:10px; font-weight:500; white-space:nowrap; }
+  .tag-both { background:var(--gold-light); color:var(--gold); }
+  .tag-sasha { background:#F0E8F5; color:#7A3B8C; }
+  .tag-doug { background:var(--teal-light); color:var(--teal); }
+  .progress-bar-wrap { background:var(--sand); border-radius:10px; height:8px; margin-bottom:18px; overflow:hidden; }
+  .progress-bar { height:100%; background:var(--teal); border-radius:10px; transition:width 0.4s ease; }
+  .progress-text { font-size:14px; color:var(--muted); margin-bottom:8px; }
+  .tally-card { background:var(--white); border-radius:18px; padding:22px; border:1px solid var(--sand); margin-bottom:16px; }
+  .tally-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; margin-bottom:5px; }
+  .tally-desc { font-size:14px; color:var(--muted); margin-bottom:20px; line-height:1.5; }
+  .tally-players { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .player-block { background:var(--cream); border-radius:14px; padding:18px 12px; text-align:center; border:1.5px solid var(--sand); transition:border-color 0.2s; }
+  .player-block.leading { border-color:var(--terracotta); background:var(--terracotta-light); }
+  .player-name { font-size:13px; font-weight:500; color:var(--muted); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; }
+  .player-score { font-family:'Playfair Display',serif; font-size:56px; font-weight:700; color:var(--dark); line-height:1; margin-bottom:14px; }
+  .player-block.leading .player-score { color:var(--terracotta); }
+  .tally-btn { display:flex; gap:8px; justify-content:center; align-items:center; }
+  .btn-plus { background:var(--terracotta); color:white; border:none; border-radius:10px; width:52px; height:44px; font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform 0.1s; font-family:'DM Sans',sans-serif; }
+  .btn-plus:active { transform:scale(0.93); }
+  .btn-minus { background:transparent; color:var(--muted); border:1.5px solid var(--sand); border-radius:10px; width:44px; height:44px; font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform 0.1s; }
+  .btn-minus:active { transform:scale(0.93); }
+  .leader-badge { text-align:center; margin-top:14px; font-size:14px; font-weight:500; color:var(--terracotta); min-height:22px; }
+  .tally-reset { background:none; border:none; font-size:13px; color:var(--muted); cursor:pointer; text-decoration:underline; margin-top:10px; display:block; text-align:center; width:100%; font-family:'DM Sans',sans-serif; padding:6px; }
+  .other-game-card { background:var(--white); border-radius:14px; padding:16px 18px; border:1px solid var(--sand); margin-bottom:12px; }
+  .og-title { font-weight:500; font-size:17px; margin-bottom:4px; }
+  .og-desc { font-size:14px; color:var(--muted); margin-bottom:14px; line-height:1.5; }
+  .og-rows { display:flex; flex-direction:column; gap:10px; }
+  .og-row { display:flex; align-items:center; gap:10px; }
+  .og-name { font-size:14px; font-weight:500; color:var(--muted); width:52px; text-transform:uppercase; letter-spacing:0.5px; }
+  .og-score-val { font-family:'Playfair Display',serif; font-size:26px; font-weight:700; color:var(--dark); min-width:34px; text-align:center; }
+  .btn-sm-plus { background:var(--terracotta); color:white; border:none; border-radius:9px; width:44px; height:40px; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform 0.1s; }
+  .btn-sm-plus:active { transform:scale(0.93); }
+  .btn-sm-minus { background:transparent; color:var(--muted); border:1.5px solid var(--sand); border-radius:9px; width:40px; height:40px; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform 0.1s; }
+  .btn-sm-minus:active { transform:scale(0.93); }
+  .og-divider { height:1px; background:var(--sand); margin:2px 0; }
+  .nat-input-row { display:flex; gap:10px; margin-top:12px; }
+  .nat-input { flex:1; padding:12px 14px; border:1px solid var(--sand); border-radius:10px; font-family:'DM Sans',sans-serif; font-size:16px; background:var(--white); color:var(--dark); }
+  .nat-add-btn { background:var(--terracotta); color:white; border:none; border-radius:10px; padding:12px 18px; font-family:'DM Sans',sans-serif; font-size:15px; cursor:pointer; }
+  .nat-list { margin-top:12px; display:flex; flex-wrap:wrap; gap:8px; }
+  .nat-tag { background:var(--gold-light); color:var(--gold); border-radius:20px; padding:6px 14px; font-size:14px; font-weight:500; cursor:pointer; }
+  .bingo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px; }
+  .bingo-cell { background:var(--cream); border:1.5px solid var(--sand); border-radius:12px; padding:12px 6px; text-align:center; cursor:pointer; transition:all 0.2s; min-height:80px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .bingo-cell.hit { background:var(--teal-light); border-color:var(--teal); }
+  .bingo-cell .bc-icon { font-size:26px; margin-bottom:6px; }
+  .bingo-cell .bc-label { font-size:12px; color:var(--muted); line-height:1.3; }
+  .bingo-cell.hit .bc-label { color:var(--teal); font-weight:500; }
+  .bingo-status { text-align:center; margin-top:12px; font-size:15px; font-weight:500; color:var(--muted); min-height:22px; }
+  .challenge-card { background:var(--white); border-radius:18px; overflow:hidden; border:1px solid var(--sand); margin-bottom:12px; }
+  .challenge-header { padding:16px 18px 0; }
+  .challenge-type { font-size:12px; font-weight:500; text-transform:uppercase; letter-spacing:0.8px; padding:4px 12px; border-radius:10px; display:inline-block; }
+  .type-secret { background:var(--gold-light); color:var(--gold); }
+  .type-together { background:var(--teal-light); color:var(--teal); }
+  .type-fun { background:var(--terracotta-light); color:var(--terracotta); }
+  .challenge-body { padding:12px 18px 16px; }
+  .challenge-title { font-family:'Playfair Display',serif; font-size:19px; font-weight:700; margin-bottom:6px; }
+  .challenge-desc { font-size:15px; color:var(--muted); line-height:1.6; }
+  .challenge-actions { padding:0 18px 16px; display:flex; gap:10px; flex-wrap:wrap; }
+  .btn-camera { background:var(--terracotta); color:white; border:none; border-radius:10px; padding:12px 20px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:500; cursor:pointer; display:flex; align-items:center; gap:8px; }
+  .btn-camera:active { transform:scale(0.97); }
+  .btn-undo { background:none; border:1.5px solid var(--sand); border-radius:10px; padding:10px 14px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--muted); cursor:pointer; }
+  .btn-skip { background:none; border:1.5px solid var(--sand); border-radius:10px; padding:12px 16px; font-family:'DM Sans',sans-serif; font-size:15px; color:var(--muted); cursor:pointer; }
+  .done-badge { background:var(--gold-light); border-radius:10px; padding:10px 16px; margin:0 18px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .done-badge-text { font-size:14px; color:var(--gold); font-weight:500; }
+  .private-gate { background:var(--white); border-radius:18px; border:1px solid var(--sand); padding:22px; margin-top:10px; }
+  .gate-title { font-family:'Playfair Display',serif; font-size:19px; font-weight:700; margin-bottom:8px; }
+  .gate-desc { font-size:15px; color:var(--muted); margin-bottom:18px; line-height:1.6; }
+  .gate-btns { display:flex; gap:12px; }
+  .gate-btn { flex:1; padding:16px 12px; border-radius:14px; border:1.5px solid var(--sand); background:var(--cream); font-family:'DM Sans',sans-serif; font-size:16px; font-weight:500; cursor:pointer; color:var(--dark); display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .gate-btn .gate-avatar { width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; }
+  .gate-btn.doug-g .gate-avatar { background:var(--teal-light); color:var(--teal); }
+  .gate-btn.sasha-g .gate-avatar { background:#F0E8F5; color:#7A3B8C; }
+  .private-panel { display:none; margin-top:18px; }
+  .private-panel.open { display:block; }
+  .private-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .private-who { font-size:15px; font-weight:500; }
+  .private-close { background:none; border:none; font-size:14px; color:var(--muted); cursor:pointer; text-decoration:underline; font-family:'DM Sans',sans-serif; padding:6px; }
+  .completed-count { background:var(--teal-light); border-radius:12px; padding:12px 18px; display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+  .cc-label { font-size:15px; color:var(--teal); font-weight:500; }
+  .cc-val { font-size:22px; font-weight:700; color:var(--teal); font-family:'Playfair Display',serif; }
+  .submission-item { background:var(--white); border-radius:14px; padding:14px 16px; border:1px solid var(--sand); margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .sub-info { flex:1; }
+  .sub-from { font-size:12px; color:var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:0.6px; }
+  .sub-title { font-size:15px; font-weight:500; margin-top:3px; }
+  .sub-show-btn { background:var(--terracotta); color:white; border:none; border-radius:10px; padding:10px 16px; font-family:'DM Sans',sans-serif; font-size:14px; cursor:pointer; white-space:nowrap; }
+
+  /* REMIND */
+  .reminder-card { background:var(--white); border-radius:18px; padding:20px; border:1px solid var(--sand); margin-bottom:14px; }
+  .reminder-title { font-weight:500; font-size:17px; margin-bottom:5px; }
+  .reminder-desc { font-size:15px; color:var(--muted); margin-bottom:16px; line-height:1.6; }
+  .notif-status-row { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .status-dot { width:10px; height:10px; border-radius:50%; background:var(--sand); flex-shrink:0; }
+  .status-dot.on { background:var(--teal); }
+  .status-label { font-size:14px; color:var(--muted); }
+  .status-label.on { color:var(--teal); font-weight:500; }
+  .btn-toggle { padding:13px 24px; border-radius:12px; border:1.5px solid var(--terracotta); background:transparent; color:var(--terracotta); font-family:'DM Sans',sans-serif; font-size:16px; font-weight:500; cursor:pointer; }
+  .btn-toggle.on { background:var(--terracotta); color:white; }
+  .schedule-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:16px; }
+  .schedule-btn { padding:12px 10px; border-radius:12px; border:1.5px solid var(--sand); background:var(--cream); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; color:var(--muted); cursor:pointer; text-align:center; transition:all 0.15s; }
+  .schedule-btn.selected { border-color:var(--terracotta); background:var(--terracotta-light); color:var(--terracotta); }
+  .next-notif-box { background:var(--gold-light); border-radius:14px; padding:14px 18px; border:1px solid rgba(184,134,11,0.2); margin-top:14px; }
+  .nr-label { font-size:12px; color:var(--gold); font-weight:500; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:5px; }
+  .nr-time { font-family:'Playfair Display',serif; font-size:24px; font-weight:700; color:var(--dark); }
+  .manual-nudge { margin-top:4px; background:var(--terracotta); color:white; border:none; border-radius:14px; padding:18px; width:100%; font-family:'DM Sans',sans-serif; font-size:17px; font-weight:500; cursor:pointer; }
+  .manual-nudge:active { transform:scale(0.98); }
+  .info-box { background:var(--teal-light); border-radius:12px; padding:14px 16px; margin-bottom:14px; }
+  .info-box p { font-size:14px; color:var(--teal); line-height:1.6; }
+
+  .toast { position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--dark); color:white; padding:13px 24px; border-radius:24px; font-size:15px; opacity:0; transition:all 0.3s; pointer-events:none; z-index:999; white-space:nowrap; max-width:88vw; text-align:center; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  @keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.15)} 100%{transform:scale(1)} }
+  .popped { animation:pop 0.25s ease; }
+  input[type=file] { display:none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div style="font-size:32px;margin-bottom:8px;">🌴</div>
+    <h1>Doug &amp; Sasha</h1>
+    <div class="subtitle">Dominican Republic Adventure</div>
+    <div class="countdown" id="countdown">Loading...</div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showSection('pack',this)"><span class="nav-icon">🧳</span>Pack</button>
+    <button class="nav-btn" onclick="showSection('tally',this)"><span class="nav-icon">🎯</span>Tally</button>
+    <button class="nav-btn" onclick="showSection('photo',this)"><span class="nav-icon">📸</span>Photo</button>
+    <button class="nav-btn" onclick="showSection('remind',this)"><span class="nav-icon">🔔</span>Remind</button>
+  </nav>
+
+  <div class="section active" id="sec-pack">
+    <div class="section-title">Don't forget to pack</div>
+    <div class="section-subtitle">Tap each item when it's in your bag</div>
+    <div class="progress-text" id="pack-progress-text">0 of 0 packed</div>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="pack-bar" style="width:0%"></div></div>
+    <div id="pack-list"></div>
+  </div>
+
+  <div class="section" id="sec-tally">
+    <div class="section-title">Game time</div>
+    <div class="section-subtitle">Compete, spot, collect</div>
+    <div class="tally-card">
+      <div class="tally-title">👁️ Hijabi spotter</div>
+      <div class="tally-desc">Who spots more? First to call it out wins the point!</div>
+      <div class="tally-players">
+        <div class="player-block" id="doug-block">
+          <div class="player-name">Doug</div>
+          <div class="player-score" id="doug-score">0</div>
+          <div class="tally-btn">
+            <button class="btn-minus" onclick="adjustScore('doug',-1)">−</button>
+            <button class="btn-plus" onclick="adjustScore('doug',1)">+1</button>
+          </div>
+        </div>
+        <div class="player-block" id="sasha-block">
+          <div class="player-name">Sasha</div>
+          <div class="player-score" id="sasha-score">0</div>
+          <div class="tally-btn">
+            <button class="btn-minus" onclick="adjustScore('sasha',-1)">−</button>
+            <button class="btn-plus" onclick="adjustScore('sasha',1)">+1</button>
+          </div>
+        </div>
+      </div>
+      <div class="leader-badge" id="leader-badge">First one to spot wins a point!</div>
+      <button class="tally-reset" onclick="resetTally()">reset scores</button>
+    </div>
+    <div class="category-label">More resort games</div>
+    <div class="other-game-card">
+      <div class="og-title">🦞 Most sunburned tourist</div>
+      <div class="og-desc">Spot the reddest person at the resort. Whoever finds a better one takes the point!</div>
+      <div class="og-rows">
+        <div class="og-row"><span class="og-name">Doug</span><button class="btn-sm-minus" onclick="adjOther('sb','doug')">−</button><span class="og-score-val" id="sb-doug-val">0</span><button class="btn-sm-plus" onclick="adjOther('sb','doug',1)">+</button></div>
+        <div class="og-divider"></div>
+        <div class="og-row"><span class="og-name">Sasha</span><button class="btn-sm-minus" onclick="adjOther('sb','sasha')">−</button><span class="og-score-val" id="sb-sasha-val">0</span><button class="btn-sm-plus" onclick="adjOther('sb','sasha',1)">+</button></div>
+      </div>
+    </div>
+    <div class="other-game-card">
+      <div class="og-title">🌍 Guess the nationality</div>
+      <div class="og-desc">Pick a guest — each of you guesses where they're from. Ask them! One point for closest guess.</div>
+      <div class="og-rows">
+        <div class="og-row"><span class="og-name">Doug</span><button class="btn-sm-minus" onclick="adjOther('nat','doug')">−</button><span class="og-score-val" id="nat-doug-val">0</span><button class="btn-sm-plus" onclick="adjOther('nat','doug',1)">+</button></div>
+        <div class="og-divider"></div>
+        <div class="og-row"><span class="og-name">Sasha</span><button class="btn-sm-minus" onclick="adjOther('nat','sasha')">−</button><span class="og-score-val" id="nat-sasha-val">0</span><button class="btn-sm-plus" onclick="adjOther('nat','sasha',1)">+</button></div>
+      </div>
+      <div class="nat-input-row">
+        <input class="nat-input" id="nat-input" placeholder="Log a nationality..." />
+        <button class="nat-add-btn" onclick="addNat()">Add</button>
+      </div>
+      <div class="nat-list" id="nat-list"></div>
+    </div>
+    <div class="other-game-card">
+      <div class="og-title">👫 Matching couples outfits</div>
+      <div class="og-desc">Spot couples dressed alike. First to 5 wins!</div>
+      <div class="og-rows">
+        <div class="og-row"><span class="og-name">Doug</span><button class="btn-sm-minus" onclick="adjOther('mc','doug')">−</button><span class="og-score-val" id="mc-doug-val">0</span><button class="btn-sm-plus" onclick="adjOther('mc','doug',1)">+</button></div>
+        <div class="og-divider"></div>
+        <div class="og-row"><span class="og-name">Sasha</span><button class="btn-sm-minus" onclick="adjOther('mc','sasha')">−</button><span class="og-score-val" id="mc-sasha-val">0</span><button class="btn-sm-plus" onclick="adjOther('mc','sasha',1)">+</button></div>
+      </div>
+    </div>
+    <div class="other-game-card">
+      <div class="og-title">🎱 Poolside bingo</div>
+      <div class="og-desc">Spot all 9 before the day ends. First to a full row wins!</div>
+      <div class="bingo-grid" id="bingo-grid"></div>
+      <div class="bingo-status" id="bingo-status"></div>
+      <button class="tally-reset" onclick="resetBingo()">reset bingo</button>
+    </div>
+  </div>
+
+  <div class="section" id="sec-photo">
+    <div class="section-title">Photo challenges</div>
+    <div class="section-subtitle">Tap 📷 to open your camera — photo saves to your camera roll automatically</div>
+    <div id="together-challenges"></div>
+    <div class="private-gate">
+      <div class="gate-title">Secret missions 🤫</div>
+      <div class="gate-desc">Private challenges just for you — your partner won't see them until you reveal. Who's playing?</div>
+      <div class="gate-btns">
+        <button class="gate-btn sasha-g" onclick="openPrivate('sasha')"><div class="gate-avatar">S</div>Sasha</button>
+        <button class="gate-btn doug-g" onclick="openPrivate('doug')"><div class="gate-avatar">D</div>Doug</button>
+      </div>
+      <div class="private-panel" id="private-panel">
+        <div class="private-header">
+          <span class="private-who" id="private-who"></span>
+          <button class="private-close" onclick="closePrivate()">close</button>
+        </div>
+        <div id="private-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-remind">
+    <div class="section-title">Reminders</div>
+    <div class="section-subtitle">Real scheduled notifications — arrive even when the app is closed</div>
+
+    <div class="info-box">
+      <p>🍎 iOS suspends web apps in the background, so timers stop. These notifications are scheduled in advance so they fire on time regardless.</p>
+    </div>
+
+    <div class="reminder-card">
+      <div class="reminder-title">🔔 Scheduled notifications</div>
+      <div class="reminder-desc">Choose how often you want a nudge. The app will schedule them all upfront so they fire even when closed.</div>
+
+      <div style="font-size:13px;font-weight:500;color:var(--dark);margin-bottom:10px;">How often?</div>
+      <div class="schedule-grid">
+        <button class="schedule-btn" onclick="selectInterval(60,this)">Every hour</button>
+        <button class="schedule-btn selected" onclick="selectInterval(120,this)">Every 2 hours</button>
+        <button class="schedule-btn" onclick="selectInterval(180,this)">Every 3 hours</button>
+        <button class="schedule-btn" onclick="selectInterval(240,this)">Every 4 hours</button>
+      </div>
+
+      <div class="notif-status-row">
+        <div class="status-dot" id="status-dot"></div>
+        <div class="status-label" id="status-label">Notifications off</div>
+      </div>
+      <button class="btn-toggle" id="notif-btn" onclick="toggleNotifs()">Turn on notifications</button>
+
+      <div class="next-notif-box" id="next-notif-box" style="display:none;">
+        <div class="nr-label">Next notification</div>
+        <div class="nr-time" id="next-notif-time">—</div>
+      </div>
+    </div>
+
+    <button class="manual-nudge" onclick="sendNudge()">🎲 Send us a nudge right now!</button>
+
+    <div class="reminder-card" style="margin-top:14px;">
+      <div class="reminder-title">📋 Today's missions</div>
+      <div class="reminder-desc">Fresh daily ideas to keep things playful.</div>
+      <div id="daily-missions"></div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="camera-input" accept="image/*" capture="environment">
+<div class="toast" id="toast"></div>
+
+<script>
+const packData=[{cat:'Documents',items:[{text:'Passports',tag:'both'},{text:'Travel insurance info',tag:'both'},{text:'Hotel booking confirmation',tag:'both'},{text:'Flight tickets / boarding passes',tag:'both'},{text:'Cash (USD accepted in DR)',tag:'both'},{text:'Credit cards',tag:'both'}]},{cat:'Toiletries',items:[{text:'Sunscreen SPF 50+',tag:'both'},{text:'After-sun lotion',tag:'both'},{text:'Insect repellent',tag:'both'},{text:'Prescription medications',tag:'both'},{text:'Ibuprofen / paracetamol',tag:'both'},{text:'Antihistamines',tag:'both'},{text:'Stomach tablets',tag:'both'},{text:'Makeup + skincare',tag:'sasha'},{text:'Shampoo / conditioner',tag:'both'},{text:'Razor',tag:'both'},{text:'Deodorant',tag:'both'}]},{cat:'Underwear & Swimwear',items:[{text:'Swimwear (pack 2!)',tag:'both'},{text:'Underwear',tag:'both'},{text:'Socks',tag:'both'},{text:'Bras',tag:'sasha'}]}];
+const bingoCells=[{icon:'🦩',label:'Pink flamingo floatie'},{icon:'🍹',label:'Fruity cocktail'},{icon:'📖',label:'Someone reading'},{icon:'😴',label:'Poolside napper'},{icon:'👒',label:'Wide sunhat'},{icon:'🤳',label:'Influencer pose'},{icon:'👶',label:'Baby in the pool'},{icon:'🕶️',label:'Matching sunglasses'},{icon:'💃',label:'Dancing to music'}];
+const sharedChallenges=[{title:'Golden hour',desc:'Take a photo together during sunset — any pose, any mood.',type:'together'},{title:'Your hands',desc:'Take a photo of your hands together — holding, playing, pointing.',type:'together'},{title:'Laughing photo',desc:'One of you has to make the other genuinely laugh. Capture it.',type:'together'},{title:'Tell the whole story',desc:'One photo that captures exactly where you are right now, no editing.',type:'together'},{title:'Local food moment',desc:'Photograph the most interesting local dish you try today.',type:'fun'},{title:'Mirror selfie',desc:'Find a reflective surface and take a photo in it.',type:'fun'},{title:'Tiny beautiful thing',desc:'Find the smallest beautiful thing around you and photograph it.',type:'fun'},{title:'The view from here',desc:"Photograph what you can see from where you're sitting right now.",type:'fun'}];
+const privateChallenges={sasha:[{title:'Catch him off guard',desc:"Take a candid of Doug when he doesn't know you're watching. Something real."},{title:'His happy face',desc:'Photo of Doug the moment something makes him smile or laugh.'},{title:'Doug in his element',desc:'Photograph Doug doing something he loves — eating, exploring, relaxing.'},{title:'A quiet moment',desc:'Find a moment where Doug looks peaceful. Capture it quietly.'}],doug:[{title:'Sasha, unsuspecting',desc:"Candid of Sasha when she's totally in her own world. Keep it sweet."},{title:'Something cute she does',desc:"Catch Sasha doing something adorable she probably doesn't notice."},{title:'The way she looks at things',desc:"Photo of Sasha while she's looking at something — the sea, a menu, a shop window."},{title:'Her laughing',desc:"Make Sasha laugh without her knowing you're about to take a photo."}]};
+const nudgeMsgs=['🎯 Time for the hijabi spotter game!','📸 Do a photo challenge!','🌊 Find something new to do together','💛 Tell each other one thing you love about today','🎲 Try a game from the tally tab!','🦞 Find the most sunburned tourist — go!','🌍 Guess the nationality of the next guest!','🎱 Check your bingo card!','👫 Spotted any matching couples today?','🌅 Take a photo together right now!'];
+const dailyMissions=["Find a stranger with an interesting hat and compliment them","Try a local food neither of you has had before","Get lost on purpose for 20 minutes","Find the best view at the resort and just sit there","Ask a local for their favourite place to eat","Write each other one thing you appreciate today on a napkin","Take one photo only using Doug's phone, one only using Sasha's","Have a conversation in made-up words for 5 minutes","Find the most interesting person at the resort and say hello","Order something neither of you has tried before"];
+
+let packState={},scores={doug:0,sasha:0},otherScores={sb:{doug:0,sasha:0},nat:{doug:0,sasha:0},mc:{doug:0,sasha:0}};
+let bingoState=[],natList=[],sharedState={},privateState={sasha:{},doug:{}},submissions=[];
+let notifOn=false, selectedIntervalMins=120, pendingCameraCallback=null;
+let scheduledNotifIds=[];
+
+// ── NOTIFICATIONS ──────────────────────────────────────────
+function selectInterval(mins, btn){
+  selectedIntervalMins=mins;
+  document.querySelectorAll('.schedule-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  // Reschedule if already on
+  if(notifOn){ cancelAllNotifs(); scheduleAllNotifs(); }
+}
+
+function toggleNotifs(){
+  if(!notifOn){
+    if(!('Notification' in window)){ showToast('Notifications not supported on this browser'); return; }
+    Notification.requestPermission().then(perm=>{
+      if(perm==='granted'){
+        notifOn=true;
+        scheduleAllNotifs();
+        updateNotifUI();
+        showToast('Notifications scheduled! 🌴');
+      } else {
+        showToast('Please allow notifications when prompted');
+      }
+    });
+  } else {
+    cancelAllNotifs();
+    notifOn=false;
+    updateNotifUI();
+    showToast('Notifications off');
+  }
+}
+
+function scheduleAllNotifs(){
+  // Schedule 20 notifications spread across the trip (covers ~2 days well)
+  const count=20;
+  const intervalMs=selectedIntervalMins*60*1000;
+  scheduledNotifIds=[];
+  for(let i=1;i<=count;i++){
+    const delay=i*intervalMs;
+    const id=setTimeout(()=>{
+      if(notifOn){
+        const msg=nudgeMsgs[Math.floor(Math.random()*nudgeMsgs.length)];
+        try{ new Notification('Doug & Sasha 🌴',{body:msg,icon:''}); }catch(e){}
+      }
+    }, delay);
+    scheduledNotifIds.push(id);
+  }
+  updateNextNotifTime();
+}
+
+function cancelAllNotifs(){
+  scheduledNotifIds.forEach(id=>clearTimeout(id));
+  scheduledNotifIds=[];
+}
+
+function updateNextNotifTime(){
+  const next=new Date(Date.now()+selectedIntervalMins*60*1000);
+  const h=next.getHours(), m=next.getMinutes();
+  const ampm=h>=12?'pm':'am';
+  const h12=h%12||12;
+  const mStr=String(m).padStart(2,'0');
+  document.getElementById('next-notif-time').textContent=`${h12}:${mStr} ${ampm}`;
+  document.getElementById('next-notif-box').style.display='block';
+}
+
+function updateNotifUI(){
+  const dot=document.getElementById('status-dot');
+  const label=document.getElementById('status-label');
+  const btn=document.getElementById('notif-btn');
+  if(notifOn){
+    dot.classList.add('on');
+    label.textContent='Notifications on';
+    label.classList.add('on');
+    btn.textContent='Turn off notifications';
+    btn.classList.add('on');
+  } else {
+    dot.classList.remove('on');
+    label.textContent='Notifications off';
+    label.classList.remove('on');
+    btn.textContent='Turn on notifications';
+    btn.classList.remove('on');
+    document.getElementById('next-notif-box').style.display='none';
+  }
+}
+
+function sendNudge(){
+  const msg=nudgeMsgs[Math.floor(Math.random()*nudgeMsgs.length)];
+  showToast(msg);
+  if(notifOn){
+    try{ new Notification('Doug & Sasha 🌴',{body:msg}); }catch(e){}
+  }
+}
+
+// ── CAMERA ────────────────────────────────────────────────
+const camInput=document.getElementById('camera-input');
+camInput.addEventListener('change',function(){
+  const file=this.files[0]; if(!file) return;
+  const url=URL.createObjectURL(file);
+  const a=document.createElement('a');
+  a.href=url; a.download='DougSasha_'+Date.now()+'.jpg';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  if(pendingCameraCallback){ pendingCameraCallback(); pendingCameraCallback=null; }
+  this.value='';
+});
+function openCamera(cb){ pendingCameraCallback=cb; camInput.click(); }
+
+// ── CORE ──────────────────────────────────────────────────
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+function showSection(id,btn){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('sec-'+id).classList.add('active');btn.classList.add('active');window.scrollTo(0,0);}
+function updateCountdown(){const trip=new Date('2026-04-01T18:00:00-04:00'),now=new Date(),diff=trip-now;if(diff<=0){document.getElementById('countdown').textContent='🌴 You\'re there!';return;}const h=Math.floor(diff/3600000),d=Math.floor(h/24),hr=h%24;document.getElementById('countdown').textContent=d>0?`Leaves in ${d}d ${hr}h`:`Leaves in ${hr}h!`;}
+updateCountdown();setInterval(updateCountdown,60000);
+
+function buildPackList(){const c=document.getElementById('pack-list');c.innerHTML='';packData.forEach(cat=>{const l=document.createElement('div');l.className='category-label';l.textContent=cat.cat;c.appendChild(l);cat.items.forEach((item,i)=>{const key=cat.cat+i,div=document.createElement('div');div.className='pack-item'+(packState[key]?' checked':'');div.onclick=()=>togglePack(key,div);const tc=item.tag==='both'?'tag-both':item.tag==='sasha'?'tag-sasha':'tag-doug';const tl=item.tag==='both'?'Both':item.tag==='sasha'?'Sasha':'Doug';div.innerHTML=`<div class="checkbox"><svg class="checkbox-tick" viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="item-text">${item.text}</span><span class="item-tag ${tc}">${tl}</span>`;c.appendChild(div);});});updateProgress();}
+function togglePack(key,el){packState[key]=!packState[key];el.classList.toggle('checked');updateProgress();}
+function updateProgress(){let total=0,done=0;packData.forEach(cat=>cat.items.forEach((_,i)=>{total++;if(packState[cat.cat+i])done++;}));document.getElementById('pack-progress-text').textContent=`${done} of ${total} packed`;document.getElementById('pack-bar').style.width=(done/total*100)+'%';}
+buildPackList();
+
+function adjustScore(player,delta){scores[player]=Math.max(0,scores[player]+delta);const el=document.getElementById(player+'-score');el.textContent=scores[player];el.classList.remove('popped');void el.offsetWidth;el.classList.add('popped');updateLeader();}
+function updateLeader(){const db=document.getElementById('doug-block'),sb=document.getElementById('sasha-block'),badge=document.getElementById('leader-badge');db.classList.remove('leading');sb.classList.remove('leading');if(scores.doug>scores.sasha){db.classList.add('leading');badge.textContent=`Doug leads by ${scores.doug-scores.sasha}!`;}else if(scores.sasha>scores.doug){sb.classList.add('leading');badge.textContent=`Sasha leads by ${scores.sasha-scores.doug}!`;}else if(scores.doug===0){badge.textContent='First one to spot wins a point!';}else{badge.textContent=`Tied at ${scores.doug} — next point wins!`;}}
+function resetTally(){scores.doug=0;scores.sasha=0;['doug','sasha'].forEach(p=>{document.getElementById(p+'-score').textContent='0';document.getElementById(p+'-block').classList.remove('leading');});document.getElementById('leader-badge').textContent='First one to spot wins a point!';showToast('Scores reset!');}
+function adjOther(game,player,delta){const d=delta===undefined?-1:1;otherScores[game][player]=Math.max(0,otherScores[game][player]+d);const el=document.getElementById(game+'-'+player+'-val');el.textContent=otherScores[game][player];el.classList.remove('popped');void el.offsetWidth;el.classList.add('popped');if(game==='mc'&&otherScores[game][player]>=5)showToast(`${player==='doug'?'Doug':'Sasha'} wins Matching Couples! 👫`);}
+function buildBingo(){const grid=document.getElementById('bingo-grid');grid.innerHTML='';bingoCells.forEach((c,i)=>{const div=document.createElement('div');div.className='bingo-cell'+(bingoState[i]?' hit':'');div.onclick=()=>toggleBingo(i,div);div.innerHTML=`<div class="bc-icon">${c.icon}</div><div class="bc-label">${c.label}</div>`;grid.appendChild(div);});updateBingoStatus();}
+function toggleBingo(i,el){bingoState[i]=!bingoState[i];el.classList.toggle('hit');updateBingoStatus();}
+function updateBingoStatus(){const hits=bingoState.filter(Boolean).length;const rows=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];const bingo=rows.some(r=>r.every(i=>bingoState[i]));document.getElementById('bingo-status').textContent=bingo?'🎉 BINGO! Full row!':hits>0?`${hits}/9 spotted`:'Tap each one as you spot it';}
+function resetBingo(){bingoState=[];buildBingo();showToast('Bingo reset!');}
+buildBingo();
+function addNat(){const input=document.getElementById('nat-input');const val=input.value.trim();if(!val)return;natList.push(val);input.value='';const tag=document.createElement('span');tag.className='nat-tag';tag.textContent=val;tag.onclick=()=>{natList=natList.filter(n=>n!==val);tag.remove();};document.getElementById('nat-list').appendChild(tag);showToast(`Added: ${val} 🌍`);}
+document.getElementById('nat-input').addEventListener('keydown',e=>{if(e.key==='Enter')addNat();});
+
+function buildTogetherChallenges(){
+  const container=document.getElementById('together-challenges');
+  container.innerHTML='<div class="category-label" style="margin-top:0">Together challenges</div>';
+  sharedChallenges.forEach((c,i)=>{
+    const key='shared-'+i,isDone=sharedState[key];
+    const typeLabel=c.type==='together'?'Together':'Just for fun';
+    const typeClass=c.type==='together'?'type-together':'type-fun';
+    const div=document.createElement('div');div.className='challenge-card';
+    const actionsHTML=isDone
+      ?`<div class="done-badge"><span class="done-badge-text">✓ Photo taken &amp; saved!</span><button class="btn-undo" onclick="undoShared(${i})">Undo</button></div>`
+      :`<div class="challenge-actions"><button class="btn-camera" onclick="shootShared(${i})">📷 Take photo</button><button class="btn-skip" onclick="this.closest('.challenge-card').style.opacity='0.4';showToast('Skipped!')">Skip</button></div>`;
+    div.innerHTML=`<div class="challenge-header"><span class="challenge-type ${typeClass}">${typeLabel}</span></div><div class="challenge-body"><div class="challenge-title">${c.title}</div><div class="challenge-desc">${c.desc}</div></div>${actionsHTML}`;
+    container.appendChild(div);
+  });
+}
+function shootShared(i){openCamera(()=>{sharedState['shared-'+i]=true;showToast('Photo saved to camera roll! 📸');buildTogetherChallenges();});}
+function undoShared(i){sharedState['shared-'+i]=false;showToast('Undone!');buildTogetherChallenges();}
+buildTogetherChallenges();
+
+function openPrivate(player){document.getElementById('private-panel').classList.add('open');document.getElementById('private-who').textContent=player==='sasha'?'Sasha\'s secret missions':'Doug\'s secret missions';renderPrivate(player);}
+function closePrivate(){document.getElementById('private-panel').classList.remove('open');}
+function renderPrivate(player){
+  const container=document.getElementById('private-content');
+  const myMissions=privateChallenges[player],partnerName=player==='sasha'?'Doug':'Sasha';
+  const doneCount=Object.values(privateState[player]).filter(v=>v).length;
+  let html=`<div class="completed-count"><span class="cc-label">Missions completed</span><span class="cc-val">${doneCount}</span></div>`;
+  myMissions.forEach((c,i)=>{
+    const key='priv-'+i,isDone=privateState[player][key];
+    const actionsHTML=isDone
+      ?`<div class="done-badge"><span class="done-badge-text">✓ Photo taken &amp; saved!</span><button class="btn-undo" onclick="undoPrivate('${player}','${key}')">Undo</button></div>`
+      :`<div class="challenge-actions"><button class="btn-camera" onclick="shootPrivate('${player}','${key}','${c.title.replace(/'/g,'&#39;')}')">📷 Take photo</button><button class="btn-skip" onclick="this.closest('.challenge-card').style.opacity='0.4';showToast('Skipped!')">Skip</button></div>`;
+    html+=`<div class="challenge-card"><div class="challenge-header"><span class="challenge-type type-secret">Secret mission</span></div><div class="challenge-body"><div class="challenge-title">${c.title}</div><div class="challenge-desc">${c.desc}<br><br><em style="color:var(--terracotta);font-size:14px;">🤫 ${partnerName} won't see this until you reveal it!</em></div></div>${actionsHTML}</div>`;
+  });
+  const subs=submissions.filter(s=>s.for===player);
+  html+=`<div style="margin-top:18px;"><div class="category-label" style="margin-top:0">Secret reveals from ${partnerName} 🎁</div>`;
+  if(!subs.length){html+=`<div style="font-size:15px;color:var(--muted);margin-top:8px;line-height:1.5;">Nothing yet — check back later!</div>`;}
+  else{subs.forEach(s=>{html+=`<div class="submission-item"><div class="sub-info"><div class="sub-from">from ${s.from}</div><div class="sub-title">${s.title}</div></div><button class="sub-show-btn" onclick="showToast('From ${s.from} with love 💛')">Reveal!</button></div>`;});}
+  html+='</div>';
+  container.innerHTML=html;
+}
+function shootPrivate(player,key,title){openCamera(()=>{privateState[player][key]=true;const revealsFor=player==='sasha'?'doug':'sasha';submissions.push({from:player==='sasha'?'Sasha':'Doug',for:revealsFor,title});showToast(`Photo saved! ${revealsFor==='sasha'?'Sasha':'Doug'} will find out later 😉`);renderPrivate(player);});}
+function undoPrivate(player,key){privateState[player][key]=false;const revealsFor=player==='sasha'?'doug':'sasha';const idx=submissions.map(s=>s.for).lastIndexOf(revealsFor);if(idx>-1)submissions.splice(idx,1);showToast('Undone!');renderPrivate(player);}
+
+function buildDailyMissions(){document.getElementById('daily-missions').innerHTML=[...dailyMissions].sort(()=>Math.random()-0.5).slice(0,4).map(m=>`<div style="padding:12px 0;border-bottom:0.5px solid var(--sand);font-size:15px;color:var(--dark);line-height:1.6;">${m}</div>`).join('');}
+buildDailyMissions();
+</script>
+</body>
+</html>
